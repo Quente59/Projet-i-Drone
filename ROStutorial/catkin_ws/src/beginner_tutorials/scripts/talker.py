@@ -4,9 +4,9 @@ import rospy
 from geometry_msgs.msg import Twist
 from turtlesim.msg import Pose
 
-
-x = 0
 global x
+x = 0
+
 
 
 def talker():
