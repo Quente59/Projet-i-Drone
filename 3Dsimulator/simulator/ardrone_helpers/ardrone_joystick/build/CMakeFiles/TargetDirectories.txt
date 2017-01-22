@@ -1,0 +1,16 @@
+/home/viki/ros_workspace/ardrone_helpers/ardrone_joystick/build/CMakeFiles/ROSBUILD_genmsg_cpp.dir
+/home/viki/ros_workspace/ardrone_helpers/ardrone_joystick/build/CMakeFiles/ROSBUILD_genmsg_lisp.dir
+/home/viki/ros_workspace/ardrone_helpers/ardrone_joystick/build/CMakeFiles/ROSBUILD_gensrv_cpp.dir
+/home/viki/ros_workspace/ardrone_helpers/ardrone_joystick/build/CMakeFiles/ROSBUILD_gensrv_lisp.dir
+/home/viki/ros_workspace/ardrone_helpers/ardrone_joystick/build/CMakeFiles/ardrone_teleop.dir
+/home/viki/ros_workspace/ardrone_helpers/ardrone_joystick/build/CMakeFiles/clean-test-results.dir
+/home/viki/ros_workspace/ardrone_helpers/ardrone_joystick/build/CMakeFiles/rosbuild_precompile.dir
+/home/viki/ros_workspace/ardrone_helpers/ardrone_joystick/build/CMakeFiles/rosbuild_premsgsrvgen.dir
+/home/viki/ros_workspace/ardrone_helpers/ardrone_joystick/build/CMakeFiles/rospack_genmsg.dir
+/home/viki/ros_workspace/ardrone_helpers/ardrone_joystick/build/CMakeFiles/rospack_genmsg_libexe.dir
+/home/viki/ros_workspace/ardrone_helpers/ardrone_joystick/build/CMakeFiles/rospack_gensrv.dir
+/home/viki/ros_workspace/ardrone_helpers/ardrone_joystick/build/CMakeFiles/test.dir
+/home/viki/ros_workspace/ardrone_helpers/ardrone_joystick/build/CMakeFiles/test-future.dir
+/home/viki/ros_workspace/ardrone_helpers/ardrone_joystick/build/CMakeFiles/test-results.dir
+/home/viki/ros_workspace/ardrone_helpers/ardrone_joystick/build/CMakeFiles/test-results-run.dir
+/home/viki/ros_workspace/ardrone_helpers/ardrone_joystick/build/CMakeFiles/tests.dir
