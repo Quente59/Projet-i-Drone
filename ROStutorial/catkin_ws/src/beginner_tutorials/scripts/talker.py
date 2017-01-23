@@ -19,10 +19,12 @@ def talker():
 
     rospy.Subscriber('/turtle1/pose', Pose, callback)
     
+    cercle = False
+    
     while not rospy.is_shutdown():
         
 
-	if x < 10.0 :
+	if (x < 8.0) & (cercle == False ) :
             message = Twist()
 	    message.linear.x = 2.0
 	    message.angular.z = 0.0
@@ -31,7 +33,8 @@ def talker():
             rate.sleep()
 
         else :
-            message = Twist()
+            cercle = True
+	    message = Twist()
 	    message.linear.x = 0.0
 	    message.angular.z = 5.0
             #rospy.loginfo(message)

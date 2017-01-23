@@ -32,7 +32,7 @@ def talker_follower():
     global y2
     global z2
    
-    pub = rospy.Publisher('/turtle1/cmd_vel', Twist, queue_size=10)
+    
     pub2 = rospy.Publisher('/turtle2/cmd_vel', Twist, queue_size=10)
     
     rospy.init_node('talker', anonymous=True)
@@ -42,35 +42,36 @@ def talker_follower():
     rospy.Subscriber('/turtle2/pose', Pose, callback2)
     
     while not rospy.is_shutdown():
-        message = Twist()
+       
         message2 = Twist()
         
         if x > x2 : 
             
-            message2.linear.x = 5.0
+            message2.linear.x = 1.0
+	    
         
         else:
-            message2.linear.x = -5.0
+            message2.linear.x = 0.0
+            message2.angular.z = -5.0
+
+        """if y > y2 : 
             
-        if y > y2 : 
-            
-            message2.linear.y = 5.0
+            message2.linear.y = 1.0
             
         else:
-            message2.linear.y = -5.0
+            message2.linear.y = -1.0"""
         
-        if z > z2 : 
+        """if z > z2 : 
             
             message2.angular.z = 5.0
             
         else:
-            message2.angular.z = -5.0
+            message2.angular.z = -5.0"""
         
-        message.linear.x = 3.0
-        message.angular.z = 3.0
+   
         
-        #rospy.loginfo(message)
-        pub.message(message)
+        #rospy.loginfo(message2)
+
         pub2.publish(message2)
         rate.sleep()
 
