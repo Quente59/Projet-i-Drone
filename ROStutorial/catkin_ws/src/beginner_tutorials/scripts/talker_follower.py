@@ -7,9 +7,18 @@ from turtlesim.msg import Pose
 global x
 global y
 global z
+
+global x2
+global y2
+global z2
+    
 x = 0
 y = 0
 z = 0
+
+x2 = 0
+y2 = 0
+z2 = 0
 
 
 
@@ -19,19 +28,50 @@ def talker_follower():
     global y
     global z
     
-    pub = rospy.Publisher('/turtle2/cmd_vel', Twist, queue_size=10)
+    global x2
+    global y2
+    global z2
+   
+    pub = rospy.Publisher('/turtle1/cmd_vel', Twist, queue_size=10)
+    pub2 = rospy.Publisher('/turtle2/cmd_vel', Twist, queue_size=10)
+    
     rospy.init_node('talker', anonymous=True)
     rate = rospy.Rate(10) # 10hz
 
     rospy.Subscriber('/turtle1/pose', Pose, callback)
+    rospy.Subscriber('/turtle2/pose', Pose, callback2)
     
     while not rospy.is_shutdown():
         message = Twist()
-        message.linear.x = x
-        message.linear.y = y
-        message.linear.z = z
+        message2 = Twist()
+        
+        if x > x2 : 
+            
+            message2.linear.x = 5.0
+        
+        else:
+            message2.linear.x = -5.0
+            
+        if y > y2 : 
+            
+            message2.linear.y = 5.0
+            
+        else:
+            message2.linear.y = -5.0
+        
+        if z > z2 : 
+            
+            message2.angular.z = 5.0
+            
+        else:
+            message2.angular.z = -5.0
+        
+        message.linear.x = 3.0
+        message.angular.z = 3.0
+        
         #rospy.loginfo(message)
-        pub.publish(message)
+        pub.message(message)
+        pub2.publish(message2)
         rate.sleep()
 
 
@@ -44,7 +84,18 @@ def callback(position):
     rospy.loginfo(rospy.get_caller_id() + 'I heard %s', position)
     x = position.x
     y = position.y
-    z = position.z
+    z = position.theta
+    
+def callback2(position2):
+    global x2
+    global y2
+    global z2
+    
+    rospy.loginfo(rospy.get_caller_id() + 'I heard %s', position2)
+    
+    x2 = position2.x
+    y2 = position2.y
+    z2 = position2.theta
     
 
 
