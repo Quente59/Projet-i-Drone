@@ -11,9 +11,13 @@ z = 0
 
 
 
+
+
 def talker_ardrone():
 
     global z
+    takeoff = False
+    compteur = 0
     
     rospy.init_node('talker_ardrone', anonymous=True)
     pub = rospy.Publisher('/cmd_vel', Twist)
@@ -28,56 +32,43 @@ def talker_ardrone():
     
     while not rospy.is_shutdown():
 
+    	
+        if z < 2000 :
 
-        """message = Twist()
-        message.linear.x = 0.0
-        message.linear.y = 0.0
-        message.linear.z = 0.0
-        message.angular.x = 0.0
-        message.angular.y = 0.0
-        message.angular.z = -1.0
-        rospy.loginfo(message)
-        pub.publish(message)
-        rate.sleep()
-    
-        if decoller :
-            message = Empty()
-            #rospy.loginfo(message)
-            pub_takeoff.publish(message)"""
-        
-	if z < 1500 :
-
-            message = Twist()
-            message.linear.x = 0.0
-            message.linear.y = 0.0
-            message.linear.z = 1.0
-            message.angular.x = 0.0
+	    message = Twist()
+	    message.linear.x = 0.0
+	    message.linear.y = 0.0
+	    message.linear.z = 1.0
+	    message.angular.x = 0.0
             message.angular.y = 0.0
             message.angular.z = 0.0
-            #rospy.loginfo(message)
-            pub.publish(message)
-            rate.sleep()
+	    #rospy.loginfo(message)
+	    pub.publish(message)
+	    rate.sleep()
 
 
-        else :
+	else :
 
-            message = Twist()
-            message.linear.x = 0.0
-            message.linear.y = 0.0
-            message.linear.z = 0.0
-            message.angular.x = 0.0
-            message.angular.y = 0.0
-            message.angular.z = -1.0
-            #rospy.loginfo(message)
-            pub.publish(message)
-            rate.sleep()
+       	    message = Twist()
+	    message.linear.x = 0.0
+	    message.linear.y = 0.0
+	    message.linear.z = 0.0
+	    message.angular.x = 0.0
+	    message.angular.y = 0.0
+	    message.angular.z = 0.0
+	    #rospy.loginfo(message)
+	    pub.publish(message)
+	    rate.sleep()
+
+	    
     
 
 
 def callback(navdata):
     global z
     
-    rospy.loginfo('Altitude %s', navdata.altd)
+    #rospy.loginfo('Altitude %s', navdata.altd)
+	
     z = navdata.altd
     
 
