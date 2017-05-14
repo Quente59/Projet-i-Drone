@@ -7,22 +7,32 @@ from std_msgs.msg import Empty
 from ardrone_autonomy.msg import Navdata
 from ar_track_alvar.msg import AlvarMarkers
 
-global markers
+global marker_id
 
-global compteur_markers
-compteur_markers = 0
+global compteur_marker
+compteur_marker = 0
+
+global compteur_no_marker
+compteur_no_marker = 0
 
 
 
 
-def talker_ardrone():
+def tags_detection():
 
-    global markers
+    global marker_id
+    global compteur_marker
+    global compteur_no_marker
+
+    
     takeoff = False
-    compteur = 0
+    compteur_takeoff = 0
     marker_detected = False
     
     rospy.init_node('tags_detection', anonymous=True)
+
+    
+        
     pub = rospy.Publisher('/cmd_vel', Twist)
     pub_takeoff = rospy.Publisher('/ardrone/takeoff', Empty)
     pub_land = rospy.Publisher('/ardrone/land', Empty)
@@ -39,67 +49,93 @@ def talker_ardrone():
     
     while not rospy.is_shutdown():
 
-    	rospy.loginfo('%s',marker_detected)
+    	
         if not takeoff :
-
+	
             message = Empty()
             #rospy.loginfo(message)
             pub_takeoff.publish(message)
-	    compteur += 1
-	    rate.sleep()
-	    #rospy.loginfo('%s',compteur)
-	    
-            if (compteur > 30) :
- 	    	takeoff = True
-        
-	    	
-
+            compteur_takeoff += 1
+            rate.sleep()
+    	    
+            if (compteur_takeoff > 30) :
+        	takeoff = True
+	    	rospy.loginfo('takeoff : %s', takeoff)
+            
 	else:
-	    
-	    if (compteur_markers > 10):
+	    #rospy.loginfo('%s',marker_detected)
+	    if ((not marker_detected) and (compteur_marker > 20)):
+		
 		marker_detected = True
 		
+		rospy.loginfo('marker_detected : %s', marker_detected)
+		rospy.loginfo('marker_id : %s', marker_id)
+
+            if ((marker_detected) and (compteur_no_marker > 20)):
+		
+		marker_detected = False
+		rospy.loginfo('marker_detected : %s', marker_detected)
+		
 	    if marker_detected:
-		message = Twist()
-	        message.linear.x = 0.0
-	        message.linear.y = 0.0
-	        message.linear.z = 0.0
-	        message.angular.x = 0.0
-	        message.angular.y = 0.0
-	        message.angular.z = -0.5
-	        #rospy.loginfo(message)
-	        pub.publish(message)
-	        rate.sleep()
-
 		
+		if (marker_id == 0):
+		    twistPlusX(pub, rate)
+
+
+		if (marker_id == 10):
+		    twistMinusX(pub, rate)
 		
-
-	
-
-	    
-    
-
 
 def callback(data):
-    global markers
-    global compteur_markers
+    global marker_id
+    global compteur_marker
+    global compteur_no_marker
+
+    
     
     if (len(data.markers) == 1):
-
-        #rospy.loginfo('%s', data.markers[0].id)
-	compteur_markers += 1
-
-    else:
-	compteur_markers = 0
-    
 	
+	marker_id = data.markers[0].id
+
+
+	compteur_no_marker = 0
+	compteur_marker += 1
+
+    else :
+
+	compteur_marker = 0
+	compteur_no_marker += 1
     
-    
+
+def twistPlusX(pub, rate):
+    message = Twist()
+    message.linear.x = 0.5
+    message.linear.y = 0.0
+    message.linear.z = 0.0
+    message.angular.x = 0.0
+    message.angular.y = 0.0
+    message.angular.z = 0.0
+    #rospy.loginfo(message)
+    pub.publish(message)
+    rate.sleep()
+
+def twistMinusX(pub, rate):
+    message = Twist()
+    message.linear.x = -0.5
+    message.linear.y = 0.0
+    message.linear.z = 0.0
+    message.angular.x = 0.0
+    message.angular.y = 0.0
+    message.angular.z = 0.0
+    #rospy.loginfo(message)
+    pub.publish(message)
+    rate.sleep()
+        
 
 
 
 if __name__ == '__main__':
     try:
-        talker_ardrone()
+        tags_detection()
     except rospy.ROSInterruptException:
         pass
