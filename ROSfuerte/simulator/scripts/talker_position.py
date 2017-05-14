@@ -12,7 +12,7 @@ from gazebo_msgs.msg import *
 
 
 global model
-model = ModelStates()
+model = ModelState()
 
 #ModelStates() correspond a 3 listes : name[], pose[], twist[]
 #ModelState() contient name, pose, twist etc. pour un element
@@ -23,7 +23,7 @@ def talker_position():
 
 
     rospy.init_node('talker_position', anonymous=True)
-    pub = rospy.Publisher('/ardrone/position', ModelStates)
+    pub = rospy.Publisher('/ardrone/position', ModelState)
     
     rate = rospy.Rate(10) # 10hz
 
@@ -36,11 +36,14 @@ def talker_position():
         rate.sleep()
 
 
-def callback(navdata):
+def callback(model_states):
 
     global model
-    model = model_states
-    rospy.loginfo('MODEL STATES %s', model_states)
+    for i in range(len(model_states.name)):
+	if (model_states.name[i] == 'quadrotor'):
+    	    model.model_name = model_states.name[i]
+	    model.pose = model_states.pose[i]
+	    model.twist = model_states.twist[i]
 
 
 
