@@ -2,7 +2,7 @@
 # license removed for brevity
 import rospy
 import roslib; roslib.load_manifest('ardrone_autonomy'); roslib.load_manifest('ar_track_alvar')
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, Pose
 from std_msgs.msg import Empty
 from ardrone_autonomy.msg import Navdata
 from ar_track_alvar.msg import AlvarMarkers
@@ -15,6 +15,15 @@ compteur_marker = 0
 global compteur_no_marker
 compteur_no_marker = 0
 
+global message_twist
+message_twist = Twist()
+
+global message_position
+message_position = Pose()
+
+global message_altd
+message_altd = 0.0
+
 
 
 
@@ -24,7 +33,11 @@ def tags_detection():
     global compteur_marker
     global compteur_no_marker
 
-    
+    global message_twist
+    global message_position
+    global message_altd
+
+    mem_altd = 0.0
     takeoff = False
     compteur_takeoff = 0
     marker_detected = False
@@ -44,6 +57,12 @@ def tags_detection():
     #rospy.Subscriber('/ardrone/navdata', Navdata, callback)
     
     rospy.Subscriber('/ar_pose_marker', AlvarMarkers, callback)
+
+    rospy.Subscriber('/cmd_vel', Twist, callback_twist)
+
+    rospy.Subscriber('/ardrone/position', Pose, callback_position)
+
+    rospy.Subscriber('/ardrone/navdata', Navdata, callback_altd)
     
    
     
@@ -52,15 +71,30 @@ def tags_detection():
     	
         if not takeoff :
 	
-            message = Empty()
-            #rospy.loginfo(message)
-            pub_takeoff.publish(message)
-            compteur_takeoff += 1
-            rate.sleep()
+            if (compteur_takeoff < 40):
+
+	        message_takeoff = Empty()
+		#rospy.loginfo(message)
+		pub_takeoff.publish(message_takeoff)
+		compteur_takeoff += 1
+                mem_altd = message_twist.linear.z
+		rate.sleep()
+		
     	    
-            if (compteur_takeoff > 30) :
-        	takeoff = True
-	    	rospy.loginfo('takeoff : %s', takeoff)
+            else: 
+		
+		if (message_altd < 1500):
+		    message_twist.linear.z = 0.5
+		    pub.publish(message_twist)
+	            rate.sleep()
+
+		else :
+		    message_twist.linear.z = mem_altd
+		    pub.publish(message_twist)
+        	    takeoff = True
+	    	    rospy.loginfo('takeoff : %s', takeoff)
+		    rospy.Rate(1).sleep()
+		    
             
 	else:
 	    #rospy.loginfo('%s',marker_detected)
@@ -76,14 +110,21 @@ def tags_detection():
 		marker_detected = False
 		rospy.loginfo('marker_detected : %s', marker_detected)
 		
-	    if marker_detected:
+	   
+
+            if marker_detected:
 		
 		if (marker_id == 0):
-		    twistPlusX(pub, rate)
+		    twistPlusX()
 
 
 		if (marker_id == 10):
-		    twistMinusX(pub, rate)
+		    twistMinusX()
+
+            correction_trajectoire()
+
+	    pub.publish(message_twist)
+            rate.sleep()
 		
 
 def callback(data):
@@ -105,31 +146,55 @@ def callback(data):
 
 	compteur_marker = 0
 	compteur_no_marker += 1
+
+def callback_twist(ardrone_twist):
+    global message_twist
+
+
+    message_twist = ardrone_twist
+
+def callback_position(ardrone_position):
+
+    global message_position
+    
+    message_position = ardrone_position
+
+def callback_altd(ardrone_altd):
+
+    global message_altd
+
+    message_altd = ardrone_altd.altd    
+
+def twistPlusX():
+
+    global message_twist
+    message_twist.linear.x = 0.5
     
 
-def twistPlusX(pub, rate):
-    message = Twist()
-    message.linear.x = 0.5
-    message.linear.y = 0.0
-    message.linear.z = 0.0
-    message.angular.x = 0.0
-    message.angular.y = 0.0
-    message.angular.z = 0.0
-    #rospy.loginfo(message)
-    pub.publish(message)
-    rate.sleep()
+def twistMinusX():
 
-def twistMinusX(pub, rate):
-    message = Twist()
-    message.linear.x = -0.5
-    message.linear.y = 0.0
-    message.linear.z = 0.0
-    message.angular.x = 0.0
-    message.angular.y = 0.0
-    message.angular.z = 0.0
-    #rospy.loginfo(message)
-    pub.publish(message)
-    rate.sleep()
+    global message_twist
+    message_twist.linear.x = -0.5
+    
+
+def correction_trajectoire():
+
+    global message_position
+    global message_twist
+
+    if message_position.orientation.z > 0.01:
+        message_twist.angular.z = -0.05
+
+    if message_position.orientation.z < -0.01:
+        message_twist.angular.z = 0.05
+
+    if message_position.position.y > 0.01:
+        message_twist.linear.y = -0.05
+
+    if message_position.position.y < -0.01:
+        message_twist.linear.y = 0.05
+
+    
         
 
 
