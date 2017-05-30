@@ -24,7 +24,11 @@ message_position = Pose()
 global message_altd
 message_altd = 0.0
 
+global compteur_timer
+compteur_timer = 0.0
 
+global time_ref
+time_ref = 0.0
 
 
 def tags_detection():
@@ -36,6 +40,9 @@ def tags_detection():
     global message_twist
     global message_position
     global message_altd
+
+    global compteur_timer
+    global time_ref
 
     mem_altd = 0.0
     takeoff = False
@@ -108,13 +115,15 @@ def tags_detection():
 
 		task_10_done = False
 		
-            if marker_detected:
+	    if marker_detected:
+
+		compteur_timer = 0.0
 		
 		if (marker_id == 0):
 		    
-		    twistPlusX()
+		    twistMinusX()
 
-		if (marker_id == 10):
+		'''if (marker_id == 10):
 
 		    if not task_10_done:
 
@@ -141,7 +150,22 @@ def tags_detection():
 			        message_twist.angular.z = 0.0
                     
 		    else:
-			twistMinusX()
+			twistMinusX()'''
+
+	    compteur_timer += 1
+	    rospy.loginfo('time : %s', compteur_timer)
+	        
+	    if (compteur_timer >= 50):
+		
+		stop()
+		landing(pub_land, rate)
+
+		while (message_altd > 100):
+		
+		    rospy.loginfo('landing')
+		
+		rospy.loginfo('landed')
+		
 
 	                
             correction_trajectoire(coef_rotation, enable_ori_z, enable_pos_y, enable_pos_z)
@@ -196,6 +220,19 @@ def twistAngularZ():
 
     global message_twist
     message_twist.angular.z = -1.0
+
+def stop():
+
+    global message_twist
+    message_twist.linear.x = 0.0
+    message_twist.linear.y = 0.0
+    message_twist.linear.z = 0.0
+
+def landing(pub, rate):
+
+    message = Empty()
+    pub.publish(message)
+    rate.sleep()
     
 def correction_trajectoire(coef_rotation, enable_ori_z, enable_pos_y, enable_pos_z):
 
