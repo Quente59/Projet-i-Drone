@@ -24,7 +24,11 @@ message_position = Pose()
 global message_altd
 message_altd = 0.0
 
+global compteur_timer
+compteur_timer = 0.0
 
+global time_ref
+time_ref = 0.0
 
 
 def tags_detection():
@@ -36,6 +40,9 @@ def tags_detection():
     global message_twist
     global message_position
     global message_altd
+
+    global compteur_timer
+    global time_ref
 
     mem_altd = 0.0
     takeoff = False
@@ -108,7 +115,9 @@ def tags_detection():
 
 		task_10_done = False
 		
-            if marker_detected:
+	    if marker_detected:
+
+		compteur_timer = 0.0
 		
 		if (marker_id == 0):
 		    
@@ -116,9 +125,12 @@ def tags_detection():
 
 		if (marker_id == 10):
 
+		    '''enable_pos_y = False
+		    twistPlusY()'''
+
 		    if not task_10_done:
 
-
+			
          		if not inRotation:
 			
 			    enable_ori_z = False
@@ -142,6 +154,23 @@ def tags_detection():
                     
 		    else:
 			twistMinusX()
+
+	    compteur_timer += 1
+	    #rospy.loginfo('time : %s', compteur_timer)
+	        
+	    if (compteur_timer >= 50):
+		
+		#stop(pub, rate)
+		landing(pub_land, rate)
+
+		while (message_altd > 100):
+		
+		    rospy.loginfo('landing')
+		    rate.sleep()
+		
+		rospy.loginfo('landed')
+		rospy.signal_shutdown('no more tag')
+		
 
 	                
             correction_trajectoire(coef_rotation, enable_ori_z, enable_pos_y, enable_pos_z)
@@ -192,10 +221,59 @@ def twistMinusX():
     global message_twist
     message_twist.linear.x = -0.5
 
+def twistPlusY():
+
+    global message_twist
+    message_twist.linear.y = 0.5
+    
+def twistMinusY():
+
+    global message_twist
+    message_twist.linear.y = -0.5
+
 def twistAngularZ():
 
     global message_twist
     message_twist.angular.z = -1.0
+
+'''def goDownZ():
+
+    global message_twist
+    saveTwist = message_twist
+    halfAltd = message_altd/2
+    enable_pos_z = False    
+
+    while (message_altd > halfAltd):
+        message_twist.linear.x = 0.0
+        message_twist.linear.y = 0.0
+        message_twist.linear.z = -1.0
+    
+    message_twist = saveTwist
+    enable_pos_z = True'''
+
+def stop(pub, rate):
+
+    global message_twist
+    message_twist.linear.x = 0.0
+    message_twist.linear.y = 0.0
+    message_twist.linear.z = 0.0
+    message_twist.angular.x = 0.0
+    message_twist.angular.y = 0.0
+    message_twist.angular.z = 0.0
+    pub.publish(message_twist)
+    rate.sleep()
+
+def takingoff(pub, rate) :
+
+    message = Empty()
+    pub.publish(message)
+    rate.sleep()
+    
+def landing(pub, rate):
+
+    message = Empty()
+    pub.publish(message)
+    rate.sleep()
     
 def correction_trajectoire(coef_rotation, enable_ori_z, enable_pos_y, enable_pos_z):
 
