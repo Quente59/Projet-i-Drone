@@ -41,10 +41,9 @@ def tags_detection():
     global message_position
     global message_altd
 
+    
     global orientation
-    global orientation_changed
-    orientation_changed = False
-    orientation = -1.0
+    orientation = 0.0
 
     global compteur_timer
     global time_ref
@@ -64,13 +63,18 @@ def tags_detection():
 
     enable_ori_z = True
     enable_pos_y = True
-    enable_pos_z = True
+    correction_altd_ON = True
 
     offset_ori_z = 0.0
+
+    task_0_done = False
+    task_13_done = False
+    task_7_done = False
 
     inRotation = False
     task_10_done = False
     coef_rotation = 1.0
+    position_corrected = False
 
     rate = rospy.Rate(10) # 10hz
 
@@ -121,6 +125,9 @@ def tags_detection():
 		rospy.loginfo('marker_detected : %s', marker_detected)
 
 		task_10_done = False
+		task_0_done = False
+    		task_13_done = False
+    		task_7_done = False
 		
 	    if marker_detected:
 
@@ -128,14 +135,116 @@ def tags_detection():
 		
 		if (marker_id == 0):
 		    
+		    if not task_0_done:
+		        while not position_corrected:
+			    rospy.loginfo("adjusting position")
+			    position_corrected = ajustement_position(0.0, 0.0)
+			    correction_altd(correction_altd_ON)
+			    pub.publish(message_twist)
+			    rate.sleep()
+			
+			task_0_done = True
+			position_corrected = False
+
 		    twistPlusX()
+
+
+
+		if (marker_id == 7):
+
+		    if not task_7_done:    #-180degres
+			
+			
+			while not position_corrected:
+			    rospy.loginfo("adjusting position")
+			    position_corrected = ajustement_position(6.0, -4.0)
+			    
+			    correction_altd(correction_altd_ON)
+			    pub.publish(message_twist)
+			    rate.sleep()
+
+         		if not inRotation:
+			
+			    enable_ori_z = False
+		            twistAngularZ()
+			    message_twist.linear.x = 0.0
+    			    message_twist.linear.y = 0.0
+
+			    if abs(message_position.orientation.z) > 0.5:
+			        inRotation = True
+
+		        else:
+			    twistAngularZ()
+			    message_twist.linear.x = 0.0
+   			    message_twist.linear.y = 0.0
+			    if abs(message_position.orientation.z) > 0.999:
+			        task_7_done = True
+				
+			        position_corrected = False
+				orientation -= 180.0
+				inRotation = False
+				offset_ori_z = 1.0
+			        enable_ori_z = True
+				#coef_rotation -= coef_rotation
+			        message_twist.angular.z = 0.0
+                    
+		    else:
+			twistPlusX()
+
+		if (marker_id == 13):
+
+		    if not task_13_done:    #+90degres
+			
+			if abs(orientation) == 90.0:
+			    test1 = 0.25
+			    test2 = 0.1
+
+			elif abs(orientation) == 180.0:
+			    test1 = 0.80
+			    test2 = 0.70
+
+
+			while not position_corrected:
+			    rospy.loginfo("adjusting position")
+			    position_corrected = ajustement_position(4.0, -4.0)
+			    
+			    correction_altd(correction_altd_ON)
+			    pub.publish(message_twist)
+			    rate.sleep()
+
+         		if not inRotation:
+			
+			    enable_ori_z = False
+		            twistPlusAngularZ()
+			    message_twist.linear.x = 0.0
+    			    message_twist.linear.y = 0.0
+
+			    if abs(message_position.orientation.z) < test1:
+			        inRotation = True
+
+		        else:
+			    twistPlusAngularZ()
+			    message_twist.linear.x = 0.0
+   			    message_twist.linear.y = 0.0
+			    if abs(message_position.orientation.z) < test2:
+			        task_13_done = True
+			        position_corrected = False
+				orientation += 90.0
+				inRotation = False
+				offset_ori_z = 1.0
+			        enable_ori_z = True
+				#coef_rotation -= coef_rotation
+			        message_twist.angular.z = 0.0
+                    
+		    else:
+			twistPlusX()
 
 		if (marker_id == 10):
 
 		    '''enable_pos_y = False
 		    twistPlusY()'''
 
-		    '''if not task_10_done:
+		    '''if not task_10_done:	#-360degres
 
 			
          		if not inRotation:
@@ -162,34 +271,48 @@ def tags_detection():
 		    else:
 			twistMinusX()'''
 
-                    if not task_10_done:
 
+
+		    if not task_10_done:    #-90degres
+			
+			
+			while not position_corrected:
+			    rospy.loginfo("adjusting position")
+			    position_corrected = ajustement_position(4.0, 0.0)
+			    correction_altd(correction_altd_ON)
+			    pub.publish(message_twist)
+			    rate.sleep()
 
          		if not inRotation:
 			
 			    enable_ori_z = False
-			    message_twist.linear.x = 0.0
-			    message_twist.linear.y = 0.0
 		            twistAngularZ()
+			    message_twist.linear.x = 0.0
+    			    message_twist.linear.y = 0.0
 
-			    if abs(message_position.orientation.z) > 0.5:
+			    if abs(message_position.orientation.z) > 0.25:
 			        inRotation = True
 
 		        else:
-			    message_twist.linear.x = 0.0
-			    message_twist.linear.y = 0.0
 			    twistAngularZ()
-			    if abs(message_position.orientation.z) > 0.99:
+			    message_twist.linear.x = 0.0
+   			    message_twist.linear.y = 0.0
+			    if abs(message_position.orientation.z) > 0.65:
 			        task_10_done = True
+			        position_corrected = False
+				orientation -= 90.0
 				inRotation = False
 				offset_ori_z = 1.0
 			        enable_ori_z = True
 				#coef_rotation -= coef_rotation
 			        message_twist.angular.z = 0.0
                     
+		    
+
 		    else:
-			twistMinusX()
-			orientation_z_mem = message_position.orientation.z
+			twistPlusX()
+			
+			#orientation_z_mem = message_position.orientation.z
 
 
 	    compteur_timer += 1
@@ -209,8 +332,9 @@ def tags_detection():
 		rospy.signal_shutdown('no more tag')
 		
 
-	                
-            correction_trajectoire(coef_rotation, enable_ori_z, enable_pos_y, enable_pos_z)
+	    correction_altd(correction_altd_ON)           
+            #correction_trajectoire(enable_pos_y)
+	    #correction_orientation(coef_rotation, offset_ori_z, enable_ori_z)
 
 	    pub.publish(message_twist)
             rate.sleep()
@@ -273,6 +397,11 @@ def twistAngularZ():
     global message_twist
     message_twist.angular.z = -1.0
 
+def twistPlusAngularZ():
+
+    global message_twist
+    message_twist.angular.z = 1.0
+
 '''def goDownZ():
     global message_twist
     saveTwist = message_twist
@@ -309,12 +438,108 @@ def landing(pub, rate):
     message = Empty()
     pub.publish(message)
     rate.sleep()
-    
-def correction_trajectoire(coef_rotation, offset_ori_z, enable_ori_z, enable_pos_y, enable_pos_z):
+
+def ajustement_position(pos_tag_x, pos_tag_y):
 
     global message_position
     global message_twist
+
+    position_x_okay = False
+    position_y_okay = False
+      
+    if orientation == 0.0:
+	if message_position.position.x > pos_tag_x + 0.01:
+	    message_twist.linear.x = -0.05
+            position_x_okay = False
+
+        if message_position.position.x < pos_tag_x - 0.01:
+       	    message_twist.linear.x = 0.05
+	    position_x_okay = False
+
+        if (message_position.position.x > pos_tag_x - 0.01) and (message_position.position.x < pos_tag_x + 0.01):
+	    message_twist.linear.x = 0.0
+	    position_x_okay = True
+ 
+   
+        if message_position.position.y > pos_tag_y + 0.01:
+	    message_twist.linear.y = -0.05
+	    position_y_okay = False
+
+        if message_position.position.y < pos_tag_y - 0.01:
+	    message_twist.linear.y = 0.05
+	    position_y_okay = False
+
+        if (message_position.position.y > pos_tag_y - 0.01) and (message_position.position.y < pos_tag_y + 0.01):
+            message_twist.linear.y = 0.0
+	    position_y_okay = True
+
+        if position_x_okay and position_y_okay:
+	    rospy.loginfo("position adjusted")
+	    return True
+        else:
+	    return False
+	
+    elif orientation == -90.0:
+	if message_position.position.x > pos_tag_x + 0.01:
+	    message_twist.linear.y = -0.05
+            position_x_okay = False
+
+        if message_position.position.x < pos_tag_x - 0.01:
+	    message_twist.linear.y = 0.05
+	    position_x_okay = False
+
+        if (message_position.position.x > pos_tag_x - 0.01) and (message_position.position.x < pos_tag_x + 0.01):
+	    message_twist.linear.y = 0.0
+	    position_x_okay = True
+ 
+   
+        if message_position.position.y > pos_tag_y + 0.01:
+	    message_twist.linear.x = 0.05
+	    position_y_okay = False
+
+        if message_position.position.y < pos_tag_y - 0.01:
+	    message_twist.linear.x = -0.05
+	    position_y_okay = False
+
+        if (message_position.position.y > pos_tag_y - 0.01) and (message_position.position.y < pos_tag_y + 0.01):
+            message_twist.linear.x = 0.0
+	    position_y_okay = True
+
+        if position_x_okay and position_y_okay:
+	    rospy.loginfo("position adjusted")
+	    return True
+        else:
+	    return False
+	
+
+
+def correction_altd(correction_altd_ON):
+
     global message_altd
+    global message_twist 
+
+    if correction_altd_ON:
+        if message_altd > 1550:
+	    message_twist.linear.z = -0.05
+
+	if message_altd < 1450:
+	    message_twist.linear.z = 0.05 
+    
+def correction_trajectoire(enable_pos_y):
+
+    global message_position
+    global message_twist
+
+    if enable_pos_y:
+
+	if message_position.position.y > 0.01:
+	    message_twist.linear.y = -0.05
+
+	if message_position.position.y < -0.01:
+	    message_twist.linear.y = 0.05
+
+
+def correction_orientation(coef_rotation, offset_ori_z, enable_ori_z):
 
     global orientation
     global orientation_changed
@@ -337,24 +562,7 @@ def correction_trajectoire(coef_rotation, offset_ori_z, enable_ori_z, enable_pos
 
 	    if message_position.orientation.z < - 0.01:
 	        message_twist.angular.z = 0.05*coef_rotation
-
-    if enable_pos_y:
-
-	if message_position.position.y > 0.01:
-	    message_twist.linear.y = -0.05
-
-	if message_position.position.y < -0.01:
-	    message_twist.linear.y = 0.05
-
-    if enable_pos_z:
-
-	if message_altd > 1550:
-	    message_twist.linear.z = -0.05
-
-	if message_altd < 1450:
-	    message_twist.linear.z = 0.05
-
-    
+	    
         
 
 
