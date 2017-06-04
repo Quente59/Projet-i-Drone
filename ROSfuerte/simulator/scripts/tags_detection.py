@@ -24,11 +24,7 @@ message_position = Pose()
 global message_altd
 message_altd = 0.0
 
-global compteur_timer
-compteur_timer = 0.0
 
-global time_ref
-time_ref = 0.0
 
 
 def tags_detection():
@@ -41,8 +37,10 @@ def tags_detection():
     global message_position
     global message_altd
 
-    global compteur_timer
-    global time_ref
+    global orientation
+    global orientation_changed
+    orientation_changed = False
+    orientation = -1.0
 
     mem_altd = 0.0
     takeoff = False
@@ -60,6 +58,8 @@ def tags_detection():
     enable_ori_z = True
     enable_pos_y = True
     enable_pos_z = True
+
+    offset_ori_z = 0.0
 
     inRotation = False
     task_10_done = False
@@ -115,9 +115,7 @@ def tags_detection():
 
 		task_10_done = False
 		
-	    if marker_detected:
-
-		compteur_timer = 0.0
+            if marker_detected:
 		
 		if (marker_id == 0):
 		    
@@ -125,12 +123,9 @@ def tags_detection():
 
 		if (marker_id == 10):
 
-		    '''enable_pos_y = False
-		    twistPlusY()'''
+		    '''if not task_10_done:
 
-		    if not task_10_done:
 
-			
          		if not inRotation:
 			
 			    enable_ori_z = False
@@ -153,27 +148,39 @@ def tags_detection():
 			        message_twist.angular.z = 0.0
                     
 		    else:
+			twistMinusX()'''
+
+		    if not task_10_done:
+
+
+         		if not inRotation:
+			
+			    enable_ori_z = False
+			    message_twist.linear.x = 0.0
+			    message_twist.linear.y = 0.0
+		            twistAngularZ()
+
+			    if abs(message_position.orientation.z) > 0.5:
+			        inRotation = True
+
+		        else:
+			    message_twist.linear.x = 0.0
+			    message_twist.linear.y = 0.0
+			    twistAngularZ()
+			    if abs(message_position.orientation.z) > 0.99:
+			        task_10_done = True
+				inRotation = False
+				offset_ori_z = 1.0
+			        enable_ori_z = True
+				#coef_rotation -= coef_rotation
+			        message_twist.angular.z = 0.0
+                    
+		    else:
 			twistMinusX()
-
-	    compteur_timer += 1
-	    #rospy.loginfo('time : %s', compteur_timer)
-	        
-	    if (compteur_timer >= 50):
-		
-		#stop(pub, rate)
-		landing(pub_land, rate)
-
-		while (message_altd > 100):
-		
-		    rospy.loginfo('landing')
-		    rate.sleep()
-		
-		rospy.loginfo('landed')
-		rospy.signal_shutdown('no more tag')
-		
+			orientation_z_mem = message_position.orientation.z
 
 	                
-            correction_trajectoire(coef_rotation, enable_ori_z, enable_pos_y, enable_pos_z)
+            correction_trajectoire(coef_rotation, offset_ori_z, enable_ori_z, enable_pos_y, enable_pos_z)
 
 	    pub.publish(message_twist)
             rate.sleep()
@@ -221,73 +228,38 @@ def twistMinusX():
     global message_twist
     message_twist.linear.x = -0.5
 
-def twistPlusY():
-
-    global message_twist
-    message_twist.linear.y = 0.5
-    
-def twistMinusY():
-
-    global message_twist
-    message_twist.linear.y = -0.5
-
 def twistAngularZ():
 
     global message_twist
     message_twist.angular.z = -1.0
-
-'''def goDownZ():
-
-    global message_twist
-    saveTwist = message_twist
-    halfAltd = message_altd/2
-    enable_pos_z = False    
-
-    while (message_altd > halfAltd):
-        message_twist.linear.x = 0.0
-        message_twist.linear.y = 0.0
-        message_twist.linear.z = -1.0
     
-    message_twist = saveTwist
-    enable_pos_z = True'''
-
-def stop(pub, rate):
-
-    global message_twist
-    message_twist.linear.x = 0.0
-    message_twist.linear.y = 0.0
-    message_twist.linear.z = 0.0
-    message_twist.angular.x = 0.0
-    message_twist.angular.y = 0.0
-    message_twist.angular.z = 0.0
-    pub.publish(message_twist)
-    rate.sleep()
-
-def takingoff(pub, rate) :
-
-    message = Empty()
-    pub.publish(message)
-    rate.sleep()
-    
-def landing(pub, rate):
-
-    message = Empty()
-    pub.publish(message)
-    rate.sleep()
-    
-def correction_trajectoire(coef_rotation, enable_ori_z, enable_pos_y, enable_pos_z):
+def correction_trajectoire(coef_rotation, offset_ori_z, enable_ori_z, enable_pos_y, enable_pos_z):
 
     global message_position
     global message_twist
     global message_altd
 
+    global orientation
+    global orientation_changed
+
     if enable_ori_z:
 
-	if message_position.orientation.z > 0.01:
-	    message_twist.angular.z = -0.05*coef_rotation
+	
+	if offset_ori_z == 1:
 
-	if message_position.orientation.z < -0.01:
-	    message_twist.angular.z = 0.05*coef_rotation
+	    if abs(message_position.orientation.z) < offset_ori_z - 0.001:
+	        message_twist.angular.z = 0.05*orientation
+		orientation_changed = False
+
+	    if not (orientation_changed) and (abs(message_position.orientation.z) > offset_ori_z - 0.001):
+		orientation -= orientation
+		orientation_changed = True
+	else:
+	    if message_position.orientation.z > 0.01:
+	        message_twist.angular.z = -0.05*coef_rotation
+
+	    if message_position.orientation.z < - 0.01:
+	        message_twist.angular.z = 0.05*coef_rotation
 
     if enable_pos_y:
 
