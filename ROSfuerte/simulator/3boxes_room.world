@@ -50,13 +50,27 @@
             </link>
         </model>
         <include filename="../models/banner_alpha.model" model_name="banner_alpha" model_pose="0.0 0.0 0.02 0.0 0.0 -1.571" />
-	<include filename="../models/banner_beta.model" model_name="banner_beta" model_pose="2.0 0.0 3.0 1.571 0 1.571" />
-	<include filename="../models/banner_cent.model" model_name="banner_cent" model_pose="2.0 0.0 5.0 1.571 0 1.571" />
-	<include filename="../models/banner_delta.model" model_name="banner_delta" model_pose="2.0 0.0 7.0 1.571 0 1.571" />
-	<include filename="../models/banner_dollar.model" model_name="banner_dollar" model_pose="2.0 0.0 9.0 1.571 0 1.571" />
-	<include filename="../models/banner_epsilon.model" model_name="banner_epsilon" model_pose="2.0 0.0 11.0 1.571 0 1.571" />
-	<include filename="../models/banner_eta.model" model_name="banner_eta" model_pose="2.0 0.0 13.0 1.571 0 1.571" />
-	<include filename="../models/banner_iota.model" model_name="banner_iota" model_pose="2.0 0.0 15.0 1.571 0 1.571" />
-	<include filename="../models/banner_kappa.model" model_name="banner_kappa" model_pose="2.0 0.0 17.0 1.571 0 1.571" />
+	<include filename="../models/banner_alpha.model" model_name="banner_alpha_2" model_pose="2.0 -6.0 0.02 0.0 0.0 -1.571" />
+	<include filename="../models/banner_alpha.model" model_name="banner_alpha_3" model_pose="4.0 -8.0 0.02 0.0 0.0 -1.571" />
+	<include filename="../models/banner_beta.model" model_name="banner_beta" model_pose="4.0 0.0 0.02 0.0 0.0 -1.571" />
+	<include filename="../models/banner_beta.model" model_name="banner_beta_2" model_pose="0.0 -6.0 0.02 0.0 0.0 -1.571" />
+	<include filename="../models/banner_beta.model" model_name="banner_beta_3" model_pose="-6.0 -6.0 0.02 0.0 0.0 -1.571" />
+	<include filename="../models/banner_beta.model" model_name="banner_beta_4" model_pose="-6.0 0.0 0.02 0.0 0.0 -1.571" />
+	<include filename="../models/banner_cent.model" model_name="banner_cent" model_pose="4.0 -4.0 0.02 0.0 0.0 -1.571" />
+	<include filename="../models/banner_delta.model" model_name="banner_delta" model_pose="6.0 -4.0 0.02 0.0 0.0 -1.571" />
+	<include filename="../models/banner_dollar.model" model_name="banner_dollar" model_pose="4.0 -6.0 0.02 0.0 0.0 -1.571" />
+	<include filename="../models/banner_dollar.model" model_name="banner_dollar_2" model_pose="4.0 -10.0 0.02 0.0 0.0 -1.571" />
+	<include filename="../models/banner_epsilon.model" model_name="banner_epsilon" model_pose="2.0 -8.0 0.02 0.0 0.0 -1.571" />
+	<include filename="../models/banner_eta.model" model_name="banner_eta" model_pose="0.0 -10.0 0.02 0.0 0.0 -1.571" />
+	<include filename="../models/banner_iota.model" model_name="banner_iota" model_pose="-2.0 -6.0 0.02 0.0 0.0 -1.571" />
+	<include filename="../models/banner_theta.model" model_name="banner_theta" model_pose="-4.0 -6.0 0.02 0.0 0.0 -1.571" />
+	<include filename="../models/banner_upsilon.model" model_name="banner_upsilon" model_pose="-6.0 -4.0 0.02 0.0 0.0 -1.571" />
+	<include filename="../models/banner_zeta.model" model_name="banner_zeta" model_pose="-2.0 0.0 0.02 0.0 0.0 -1.571" />
+	<include filename="../models/banner_kappa.model" model_name="banner_kappa" model_pose="2.0 0.0 0.02 0.0 0.0 -1.571" />
+	<include filename="../models/banner_kappa.model" model_name="banner_kappa_2" model_pose="4.0 -2.0 0.02 0.0 0.0 -1.571" />
+	<include filename="../models/banner_kappa.model" model_name="banner_kappa_3" model_pose="2.0 -10.0 0.02 0.0 0.0 -1.571" />
+	<include filename="../models/banner_kappa.model" model_name="banner_kappa_4" model_pose="0.0 -8.0 0.02 0.0 0.0 -1.571" />
+	<include filename="../models/banner_kappa.model" model_name="banner_kappa_5" model_pose="-6.0 -2.0 0.02 0.0 0.0 -1.571" />
+	<include filename="../models/banner_kappa.model" model_name="banner_kappa_6" model_pose="-4.0 0.0 0.02 0.0 0.0 -1.571" />
     </world>
 </gazebo>
