@@ -27,21 +27,20 @@ for line in mon_fichier_z.readlines():
 
 mon_fichier_z.close()
 
-v = []
-mon_fichier_v = open("tracev.txt", "r")
-for line in mon_fichier_v.readlines():
-    v.append(float(line))
 
-mon_fichier_v.close()
+time = range(0, len(z))
 
 
-time = range(0, len(v))
-
+maxi = max (len(x1), len(y1))
+x1 = x1[:maxi]
+y1 = y1[:maxi]
 axes = plt.gca()
 axes.set_xlim([-8.0, 10.0])
 axes.set_ylim([-12.0, 2.0])
 plt.plot(x, y, x1, y1)
 plt.show()
 
-plt.plot(v, z)
+plt.plot(time, z)
 plt.show()
+
+
