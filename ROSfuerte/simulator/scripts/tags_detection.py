@@ -64,6 +64,8 @@ def tags_detection():
     enable_ori_z = True
     enable_pos_y = True
     correction_altd_ON = True
+    altitude = 1500.0
+    changeAltd = True
 
     offset_ori_z = 0.0
 
@@ -88,6 +90,10 @@ def tags_detection():
     compteur_tag_14 = 0
     pos_tag_9 = [[0.0,-10.0]]
     compteur_tag_9 = 0
+    pos_tag_3 = [[-2.0,-6.0]]
+    compteur_tag_3 = 0
+    pos_tag_6 = [[-4.0,-6.0]]
+    compteur_tag_6 = 0
     
 
     inRotation = False
@@ -151,6 +157,8 @@ def tags_detection():
 		task_4_done = False
 		task_14_done = False
 		task_9_done = False
+		task_3_done = False
+		task_6_done = False
 		
 	    if marker_detected:
 
@@ -163,7 +171,7 @@ def tags_detection():
 			    #rospy.loginfo("adjusting position and orientation")
 			    position_corrected = ajustement_position(pos_tag_0[compteur_tag_0][0], pos_tag_0[compteur_tag_0][1])
 			    orientation_corrected = ajustement_orientation()
-			    correction_altd(correction_altd_ON)
+			    correction_altd(correction_altd_ON, altitude)
 			    pub.publish(message_twist)
 			    rate.sleep()
 			
@@ -181,7 +189,7 @@ def tags_detection():
 			    #rospy.loginfo("adjusting position")
 			    position_corrected = ajustement_position(pos_tag_4[compteur_tag_4][0], pos_tag_4[compteur_tag_4][1])
 			    orientation_corrected = ajustement_orientation()
-			    correction_altd(correction_altd_ON)
+			    correction_altd(correction_altd_ON, altitude)
 			    pub.publish(message_twist)
 			    rate.sleep()
 			
@@ -199,7 +207,7 @@ def tags_detection():
 			    #rospy.loginfo("adjusting position and orientation")
 			    position_corrected = ajustement_position(pos_tag_9[compteur_tag_9][0], pos_tag_9[compteur_tag_9][1])
 			    orientation_corrected = ajustement_orientation()
-			    correction_altd(correction_altd_ON)
+			    correction_altd(correction_altd_ON, altitude)
 			    pub.publish(message_twist)
 			    rate.sleep()
 			
@@ -217,7 +225,7 @@ def tags_detection():
 			    #rospy.loginfo("adjusting position")
 			    position_corrected = ajustement_position(pos_tag_14[compteur_tag_14][0], pos_tag_14[compteur_tag_14][1])
 			    orientation_corrected = ajustement_orientation()
-			    correction_altd(correction_altd_ON)
+			    correction_altd(correction_altd_ON, altitude)
 			    pub.publish(message_twist)
 			    rate.sleep()
 			
@@ -237,7 +245,7 @@ def tags_detection():
 			    #rospy.loginfo("adjusting position")
 			    position_corrected = ajustement_position(pos_tag_7[compteur_tag_7][0], pos_tag_7[compteur_tag_7][1])
 			    
-			    correction_altd(correction_altd_ON)
+			    correction_altd(correction_altd_ON, altitude)
 			    pub.publish(message_twist)
 			    rate.sleep()
 
@@ -286,7 +294,7 @@ def tags_detection():
 			    #rospy.loginfo("adjusting position")
 			    position_corrected = ajustement_position(pos_tag_13[compteur_tag_13][0], pos_tag_13[compteur_tag_13][1])
 			    
-			    correction_altd(correction_altd_ON)
+			    correction_altd(correction_altd_ON, altitude)
 			    pub.publish(message_twist)
 			    rate.sleep()
 
@@ -360,15 +368,27 @@ def tags_detection():
 			if abs(orientation) == 0.0:
 			    test1 = 0.25
 			    test2 = 0.68
+			    coef = 1.0
 
 			elif abs(orientation) == 90.0:
 			    test1 = 0.80
 			    test2 = 0.999
+			    coef = 1.0
+
+			elif abs(orientation) == 180.0:
+			    test1 = -0.80
+			    test2 = -0.70
+			    coef = -1.0
+
+			elif abs(orientation) == 270.0:
+			    test1 = -0.68
+			    test2 = -0.25
+			    coef = -1.0
 			
 			while not position_corrected:
 			    #rospy.loginfo("adjusting position")
 			    position_corrected = ajustement_position(pos_tag_10[compteur_tag_10][0], pos_tag_10[compteur_tag_10][1])
-			    correction_altd(correction_altd_ON)
+			    correction_altd(correction_altd_ON, altitude)
 			    pub.publish(message_twist)
 			    rate.sleep()
 
@@ -379,14 +399,14 @@ def tags_detection():
 			    message_twist.linear.x = 0.0
     			    message_twist.linear.y = 0.0
 
-			    if abs(message_position.orientation.z) > test1:
+			    if coef*abs(message_position.orientation.z) > test1:
 			        inRotation = True
 
 		        else:
 			    twistAngularZ()
 			    message_twist.linear.x = 0.0
    			    message_twist.linear.y = 0.0
-			    if abs(message_position.orientation.z) > test2:
+			    if coef*abs(message_position.orientation.z) > test2:
 			        task_10_done = True
 				compteur_tag_10 +=1
 			        position_corrected = False
@@ -403,6 +423,85 @@ def tags_detection():
 			twistPlusX()
 			
 			#orientation_z_mem = message_position.orientation.z
+
+		if (marker_id == 3): #down
+
+		    if not task_3_done:
+		        while not (position_corrected):# and orientation_corrected):
+			    #rospy.loginfo("adjusting position")
+			    position_corrected = ajustement_position(pos_tag_3[compteur_tag_3][0], pos_tag_3[compteur_tag_3][1])
+			    #orientation_corrected = ajustement_orientation()
+			    correction_altd(correction_altd_ON, altitude)
+			    pub.publish(message_twist)
+			    rate.sleep()
+
+			correction_altd_ON = False
+			
+			if changeAltd :
+			
+			    halfAltd = 1000.0
+			    changeAltd = False
+
+			if (message_altd > halfAltd):
+			    rospy.loginfo("je descends")
+			    message_twist.linear.x = 0.0
+			    message_twist.linear.y = 0.0
+			    message_twist.angular.z = 0.0
+			    twistMinusZ()
+
+			else :
+			    altitude = halfAltd
+			    correction_altd_ON = True
+			    message_twist.linear.x = 0.0
+			    message_twist.linear.y = 0.0
+			    message_twist.angular.z = 0.0
+			    twistPlusX()
+
+			    task_3_done = True
+		    	    compteur_tag_3 +=1
+			    position_corrected = False
+			    orientation_corrected = False
+			    changeAltd = True
+			
+
+		if (marker_id == 6): #up
+
+		    if not task_6_done:
+		        while not (position_corrected): #and orientation_corrected):
+			    #rospy.loginfo("adjusting position")
+			    position_corrected = ajustement_position(pos_tag_6[compteur_tag_6][0], pos_tag_6[compteur_tag_6][1])
+			    #orientation_corrected = ajustement_orientation()
+			    correction_altd(correction_altd_ON, altitude)
+			    pub.publish(message_twist)
+			    rate.sleep()
+			
+			correction_altd_ON = False
+			
+			if changeAltd :
+
+			    doubleAltd = 1500.0
+			    changeAltd = False
+
+			if (message_altd < doubleAltd):
+			    message_twist.linear.x = 0.0
+			    message_twist.linear.y = 0.0
+			    message_twist.angular.z = 0.0
+			    twistPlusZ()
+			    
+
+			else :
+			    altitude = doubleAltd
+			    correction_altd_ON = True
+			    message_twist.linear.x = 0.0
+			    message_twist.linear.y = 0.0
+			    message_twist.angular.z = 0.0
+			    twistPlusX()
+
+			    task_6_done = True
+		    	    compteur_tag_6 +=1
+			    position_corrected = False
+			    orientation_corrected = False
+			    changeAltd = True
 
 
 	    compteur_timer += 1
@@ -422,7 +521,7 @@ def tags_detection():
 		rospy.signal_shutdown('no more tag')
 		
 
-	    correction_altd(correction_altd_ON)           
+	    correction_altd(correction_altd_ON, altitude)           
             #correction_trajectoire(enable_pos_y)
 	    #correction_orientation(coef_rotation, offset_ori_z, enable_ori_z)
 
@@ -465,45 +564,42 @@ def callback_altd(ardrone_altd):
 def twistPlusX():
 
     global message_twist
-    message_twist.linear.x = 0.5
+    message_twist.linear.x = 0.6
     
 def twistMinusX():
 
     global message_twist
-    message_twist.linear.x = -0.5
+    message_twist.linear.x = -0.6
 
 def twistPlusY():
 
     global message_twist
-    message_twist.linear.y = 0.5
+    message_twist.linear.y = 0.6
     
 def twistMinusY():
 
     global message_twist
-    message_twist.linear.y = -0.5
+    message_twist.linear.y = -0.6
+
+def twistMinusZ():
+
+    global message_twist
+    message_twist.linear.z = -0.6
+
+def twistPlusZ():
+
+    global message_twist
+    message_twist.linear.z = 0.4
 
 def twistAngularZ():
 
     global message_twist
-    message_twist.angular.z = -1.0
+    message_twist.angular.z = -0.4
 
 def twistPlusAngularZ():
 
     global message_twist
-    message_twist.angular.z = 1.0
-
-'''def goDownZ():
-    global message_twist
-    saveTwist = message_twist
-    halfAltd = message_altd/2
-    enable_pos_z = False    
-    while (message_altd > halfAltd):
-        message_twist.linear.x = 0.0
-        message_twist.linear.y = 0.0
-        message_twist.linear.z = -1.0
-    
-    message_twist = saveTwist
-    enable_pos_z = True'''
+    message_twist.angular.z = 0.6
 
 def stop(pub, rate):
 
@@ -665,15 +761,15 @@ def ajustement_orientation():
 	    return False
 	
     if orientation == -90.0:
-	if abs(message_position.orientation.z) > 0.72:
+	if abs(message_position.orientation.z) > 0.73:
 	    message_twist.angular.z = 0.05
             orientation_okay = False
 
-        if abs(message_position.orientation.z) < 0.70:
+        if abs(message_position.orientation.z) < 0.71:
        	    message_twist.angular.z = -0.05
 	    orientation_okay = False
 
-        if (abs(message_position.orientation.z) > 0.70) and (abs(message_position.orientation.z) < 0.72):
+        if (abs(message_position.orientation.z) > 0.71) and (abs(message_position.orientation.z) < 0.73):
 	    message_twist.angular.z = 0.0
 	    orientation_okay = True
 
@@ -685,16 +781,16 @@ def ajustement_orientation():
 
    
 
-def correction_altd(correction_altd_ON):
+def correction_altd(correction_altd_ON, altitude):
 
     global message_altd
     global message_twist 
 
     if correction_altd_ON:
-        if message_altd > 1550:
+        if message_altd > (altitude + 50.0):
 	    message_twist.linear.z = -0.05
 
-	if message_altd < 1450:
+	if message_altd < (altitude - 50.0):
 	    message_twist.linear.z = 0.05 
     
 def correction_trajectoire(enable_pos_y):
