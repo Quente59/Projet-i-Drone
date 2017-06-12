@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+
+<launch>
+   
+  <include file="$(find cvg_sim_test)/launch/3boxes_room.launch" >
+    
+  </include>
+
+  <include file="$(find ar_track_alvar)/launch/pr2_indiv_no_kinect.launch" >
+    
+  </include>
+  
+  <node name="camera_bottom" pkg="image_view" type="image_view" args="image:=/ardrone/bottom/image_raw" respawn="true" />
+
+  <node name="data_ardrone" pkg="ardrone_autonomy" type="data_ardrone.py" respawn="true" />
+
+  <node name="tracexy" pkg="ardrone_autonomy" type="tracexy.py" respawn="true" />
+
+  <node name="tracev" pkg="ardrone_autonomy" type="tracev.py" respawn="true" />
+
+  
+
+  
+   
+</launch>

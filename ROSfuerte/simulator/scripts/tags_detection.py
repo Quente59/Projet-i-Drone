@@ -75,6 +75,7 @@ def tags_detection():
     task_4_done = False
     task_14_done = False
     task_9_done = False
+    task_11_done = False
 
     pos_tag_0 = [[0.0,0.0],[2.0,-6.0],[4.0,-8.0]]
     compteur_tag_0 = 0
@@ -94,7 +95,8 @@ def tags_detection():
     compteur_tag_3 = 0
     pos_tag_6 = [[-4.0,-6.0]]
     compteur_tag_6 = 0
-    
+    pos_tag_11 = [[-6.0,-4.0]]
+    compteur_tag_11 = 0
 
     inRotation = False
     task_10_done = False
@@ -159,6 +161,7 @@ def tags_detection():
 		task_9_done = False
 		task_3_done = False
 		task_6_done = False
+		task_11_done = False
 		
 	    if marker_detected:
 
@@ -381,8 +384,8 @@ def tags_detection():
 			    coef = -1.0
 
 			elif abs(orientation) == 270.0:
-			    test1 = -0.68
-			    test2 = -0.25
+			    test1 = -0.25
+			    test2 = -0.05
 			    coef = -1.0
 			
 			while not position_corrected:
@@ -439,7 +442,7 @@ def tags_detection():
 			
 			if changeAltd :
 			
-			    halfAltd = 1000.0
+			    halfAltd = 1450.0
 			    changeAltd = False
 
 			if (message_altd > halfAltd):
@@ -462,7 +465,20 @@ def tags_detection():
 			    position_corrected = False
 			    orientation_corrected = False
 			    changeAltd = True
+		
+		if (marker_id == 11): #landing
+
+		    while not (position_corrected): #and orientation_corrected):
+			#rospy.loginfo("adjusting position")
+			position_corrected = ajustement_position(pos_tag_11[compteur_tag_11][0], pos_tag_11[compteur_tag_11][1])
+			#orientation_corrected = ajustement_orientation()
+			correction_altd(correction_altd_ON, altitude)
+			pub.publish(message_twist)
+			rate.sleep()
 			
+		    correction_altd_ON = False
+		
+		    compteur_timer = 100	
 
 		if (marker_id == 6): #up
 
@@ -479,7 +495,7 @@ def tags_detection():
 			
 			if changeAltd :
 
-			    doubleAltd = 1500.0
+			    doubleAltd = 1550.0
 			    changeAltd = False
 
 			if (message_altd < doubleAltd):
@@ -564,7 +580,7 @@ def callback_altd(ardrone_altd):
 def twistPlusX():
 
     global message_twist
-    message_twist.linear.x = 0.6
+    message_twist.linear.x = 0.5
     
 def twistMinusX():
 
